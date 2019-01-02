@@ -1,0 +1,35 @@
+language: cpp
+compiler: gcc
+dist: trusty
+
+before_install:
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - sudo apt-get update
+
+install:
+  - sudo apt-get -y install make gcc libcurl4-gnutls-dev gcc-7
+  
+script:
+  - git submodule update --init --recursive
+  - export CC=gcc-7
+  - make all
+  - mkdir -p appdir/usr/bin ; cp ./main/ipfs appdir/usr/bin/
+  - mkdir -p appdir/usr/share/applications ; cp ipfs.desktop appdir/usr/share/applications/
+  - mkdir -p appdir/usr/share/icons/hicolor/512x512/apps ; wget -c "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Ipfs-logo-1024-ice-text.png/512px-Ipfs-logo-1024-ice-text.png" -O appdir/usr/share/icons/512x512/scalable/apps/ipfs.png 
+  - export LD_LIBRARY_PATH=./c-libp2p/:$LD_LIBRARY_PATH
+  - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
+  # mkdir -p appdir/usr/optional/ ; wget -c https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/exec-x86_64.so -O ./appdir/usr/optional/exec.so
+  # mkdir -p appdir/usr/optional/libstdc++/ ; cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ./appdir/usr/optional/libstdc++/
+  # ( cd appdir ; rm AppRun ; wget -c https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/AppRun-patched-x86_64 -O AppRun ; chmod a+x AppRun)
+  - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
+
+after_success:
+  - find appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
+  - # curl --upload-file c-ipfs*.AppImage https://transfer.sh/c-ipfs-git.$(git rev-parse --short HEAD)-x86_64.AppImage
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash upload.sh c-ipfs*.AppImage*
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
