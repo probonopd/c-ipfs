@@ -1,5 +1,4 @@
-CFLAGS=-std=c99
-export CFLAGS
+
 DEBUG = true
 export DEBUG
 
