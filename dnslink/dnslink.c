@@ -46,6 +46,7 @@ Expect these resolutions:
 
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #ifdef __MINGW32__
     #include <stdint.h>
 
