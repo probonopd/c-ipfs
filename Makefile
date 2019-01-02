@@ -1,4 +1,4 @@
-
+CFLAGS=-std=c99
 DEBUG = true
 export DEBUG
 
