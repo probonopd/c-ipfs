@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=c-ipfs
+Comment=IPFS implementation in C (not just an API client library)
+Exec=ipfs
+Icon=ipfs
+Terminal=true
+Categories=Network;P2P;
