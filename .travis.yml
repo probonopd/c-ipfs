@@ -2,8 +2,12 @@ language: cpp
 compiler: gcc
 dist: trusty
 
+before_install:
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - sudo apt-get update
+
 install:
-  - sudo apt install make gcc libcurl4-gnutls-dev 
+  - sudo apt install make gcc libcurl4-gnutls-dev gcc-8
   
 script:
   - git submodule update --init --recursive
@@ -13,6 +17,9 @@ script:
   - mkdir -p appdir/usr/share/icons/hicolor/512x512/apps ; wget -c "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Ipfs-logo-1024-ice-text.png/512px-Ipfs-logo-1024-ice-text.png" -O appdir/usr/share/icons/512x512/scalable/apps/ipfs.png 
   - export LD_LIBRARY_PATH=./c-libp2p/:$LD_LIBRARY_PATH
   - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
+  - mkdir -p appdir/usr/optional/ ; wget -c https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/exec-x86_64.so -O ./appdir/usr/optional/exec.so
+  - mkdir -p appdir/usr/optional/libstdc++/ ; cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 ./appdir/usr/optional/libstdc++/
+  - ( cd appdir ; rm AppRun ; wget -c https://github.com/darealshinji/AppImageKit-checkrt/releases/download/continuous/AppRun-patched-x86_64 -O AppRun ; chmod a+x AppRun)
   - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
 
 after_success:
