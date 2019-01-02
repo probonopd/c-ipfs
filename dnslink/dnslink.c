@@ -46,6 +46,9 @@ Expect these resolutions:
 
 #include <stdlib.h>
 #include <string.h>
+#ifndef _BSD_SOURCE
+    #define _BSD_SOURCE
+#endif
 #include <sys/types.h>
 #ifdef __MINGW32__
     #include <stdint.h>
