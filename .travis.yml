@@ -1,0 +1,27 @@
+language: cpp
+compiler: gcc
+dist: trusty
+
+install:
+  - sudo apt install make gcc libcurl4-gnutls-dev 
+  
+script:
+  - git submodule update --init --recursive
+  - make all
+  - mkdir -p appdir/usr/bin ; cp ./main/ipfs appdir/usr/bin/
+  - mkdir -p appdir/usr/share/applications ; cp ipfs.desktop appdir/usr/share/applications/
+  - mkdir -p appdir/usr/share/icons/hicolor/512x512/apps ; wget -c "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Ipfs-logo-1024-ice-text.png/512px-Ipfs-logo-1024-ice-text.png" -O appdir/usr/share/icons/512x512/scalable/apps/ipfs.png 
+  - export LD_LIBRARY_PATH=./c-libp2p/:$LD_LIBRARY_PATH
+  - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
+  - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
+
+after_success:
+  - find appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
+  - # curl --upload-file APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash upload.sh APPNAME*.AppImage*
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
